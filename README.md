@@ -1,4 +1,4 @@
-# VectorDB (Day 1)
+# VectorDB
 
 A small Vector DB API in FastAPI with Libraries → Documents → Chunks,
 stub embeddings, Flat (exact) search, and per-library embedding dimension enforcement.
