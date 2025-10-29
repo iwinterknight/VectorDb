@@ -3,15 +3,14 @@ from uuid import UUID
 from app.domain.dtos import CreateLibraryIn, UpdateLibraryIn
 from app.repo.memory import InMemoryRepo
 from app.services.libraries import LibraryService
+from app.singletons import get_repo
 
 router = APIRouter(prefix="/v1/libraries", tags=["libraries"])
 
+repo_singleton = get_repo()
+
 def get_lib_service(repo: InMemoryRepo = Depends(lambda: repo_singleton)) -> LibraryService:
     return LibraryService(repo)
-
-# wire a module-level singleton repo for Day 1
-from app.repo.memory import InMemoryRepo
-repo_singleton = InMemoryRepo()
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_library(body: CreateLibraryIn, svc: LibraryService = Depends(get_lib_service)):

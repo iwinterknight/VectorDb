@@ -5,41 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9ea72dbf-9292-42ba-b414-3c927b8ebb6f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/VectorDb.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/chunks.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/documents.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/libraries.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/search.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/domain/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/domain/dtos.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/domain/errors.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/domain/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/repo/indices/flat.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/repo/indices/metrics.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/repo/memory.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/chunks.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/documents.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/embeddings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/libraries.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/search.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/validation.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/scripts/demo_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/api/test_dim_enforcement.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/api/test_smoke.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/indexing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/repo/indices/rp_forest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/filters.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/services/indexing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/singletons.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/api/test_filters.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/api/test_index_build_and_search_rp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/libraries.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/libraries.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/search.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/search.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/domain/dtos.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/domain/dtos.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/domain/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/domain/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/search.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/search.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,34 +35,34 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
   <component name="ProjectId" id="34if2L69HbpFPChrhFNdlisaXlH" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.26830.99" />
-        <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.27397.106" />
+        <option value="bundled-python-sdk-4e2b1448bda8-9a97661f3031-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.27397.106" />
       </set>
     </attachedChunks>
   </component>
@@ -94,7 +73,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1761701104189</updated>
-      <workItem from="1761701105779" duration="2666000" />
+      <workItem from="1761701105779" duration="20321000" />
+      <workItem from="1761763332107" duration="6629000" />
     </task>
     <servers />
   </component>

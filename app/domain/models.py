@@ -3,8 +3,13 @@ from pydantic import BaseModel, Field
 from datetime import datetime, timezone
 from typing import Any, Literal
 from uuid import UUID, uuid4
+from enum import Enum
 
 UtcNow = lambda: datetime.now(timezone.utc)
+
+class IndexAlgo(str, Enum):
+    flat = "flat"
+    rp = "rp"
 
 class ChunkMeta(BaseModel):
     created_at: datetime = Field(default_factory=UtcNow)
@@ -25,7 +30,7 @@ class LibraryMeta(BaseModel):
 
 class IndexState(BaseModel):
     built: bool = False
-    algo: Literal["flat"] | None = None
+    algo: IndexAlgo | None = None
     metric: Literal["cosine", "l2"] = "cosine"
     params: dict[str, Any] = Field(default_factory=dict)
     size: int = 0

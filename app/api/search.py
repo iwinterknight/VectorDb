@@ -4,12 +4,19 @@ from app.domain.dtos import SearchRequest
 from app.repo.memory import InMemoryRepo
 from app.services.search import SearchService
 from app.services.embeddings import StubEmbeddingProvider
-from app.api.libraries import repo_singleton
+from app.singletons import get_repo, get_indexer
 
 router = APIRouter(prefix="/v1/libraries/{lib_id}", tags=["search"])
 
-def get_search_service(repo: InMemoryRepo = Depends(lambda: repo_singleton)) -> SearchService:
-    return SearchService(repo, StubEmbeddingProvider())
+repo_singleton = get_repo()
+indexer_singleton = get_indexer()
+
+def get_search_service(
+    repo: InMemoryRepo = Depends(lambda: repo_singleton)
+) -> SearchService:
+    embedder = StubEmbeddingProvider()
+    indexer = indexer_singleton
+    return SearchService(repo, embedder, indexer)
 
 @router.post("/search")
 def search(lib_id: UUID, body: SearchRequest, svc: SearchService = Depends(get_search_service)):
