@@ -13,19 +13,12 @@ router = APIRouter(prefix="/v1", tags=["search-temporal"])
 
 @router.post("/libraries/{lib_id}/search/temporal")
 async def search_temporal(lib_id: str, body: Dict[str, Any], wait: bool = Query(True)):
-    """
-    Start durable search via Temporal.
-    Body mirrors /v1/libraries/{lib_id}/search (SearchRequest).
-    Query param ?wait=true/false to wait or return workflow ids.
-    """
-    payload = WFQueryIn(library_id=lib_id, request=body, request_id=body.get("request_id"))
+    payload = {"library_id": lib_id, "request": body, "request_id": body.get("request_id")}
     out = await start_query_workflow(payload, wait=wait)
     if wait:
-        # WFAnswerOut -> dict
-        ans = out  # type: ignore[assignment]
-        return {"hits": ans.hits, "meta": ans.meta}
+        return out  # {"hits": [...], "meta": {...}}
     else:
-        wf_id, run_id = out  # type: ignore[assignment]
+        wf_id, run_id = out
         return {"workflow_id": wf_id, "run_id": run_id}
 
 @router.get("/temporal/{workflow_id}/status")

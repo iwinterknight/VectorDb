@@ -1,9 +1,31 @@
 services:
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=temporal
+      - POSTGRES_PASSWORD=temporal
+      - POSTGRES_DB=temporal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   temporal:
-    image: ghcr.io/temporalio/temporalite:latest
-    command: ["start", "--namespace", "default", "--ip", "0.0.0.0", "--port", "7233"]
+    image: temporalio/auto-setup:latest
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_DB=temporal
+      - POSTGRES_SEEDS=postgres
+      - TEMPORAL_DEFAULT_NAMESPACE=default
     ports:
       - "7233:7233"
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   temporal-ui:
