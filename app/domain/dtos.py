@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Any, Literal
+from typing import Any, Literal, List, Optional
 from datetime import datetime
 
 class CreateLibraryIn(BaseModel):
@@ -43,6 +43,15 @@ class SearchRequest(BaseModel):
     algo: Literal["auto", "flat", "rp"] = "auto"
     metric: Literal["cosine", "l2"] = "cosine"
     filters: FilterSpec | None = None
+
+
+class RerankRequest(BaseModel):
+    # Provide EITHER query_text or query_embedding (like SearchRequest)
+    query_text: Optional[str] = None
+    query_embedding: Optional[List[float]] = None
+    candidate_ids: List[str] = Field(default_factory=list)
+    k: int = 5
+    metric: str = "cosine"   # "cosine" | "l2"
 
 class SearchHit(BaseModel):
     chunk_id: str

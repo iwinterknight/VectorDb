@@ -1,33 +1,34 @@
 # app/main.py
 import logging
-
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-from app.api import libraries, documents, chunks, search
-from app.api import indexing
+from app.api import libraries, documents, chunks, search, indexing, admin
+from app.api.search_temporal import router as search_temporal_router
+from app.singletons import bootstrap_from_disk
 from app.domain.errors import NotFoundError, ConflictError, BadRequestError
 from pydantic import ValidationError as PydanticValidationError
 
 def _configure_logging():
     logger = logging.getLogger("vectordb")
     logger.setLevel(logging.INFO)
-    # If nothing attached yet, add a simple stream handler
     if not logger.handlers:
         h = logging.StreamHandler()
         fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s - %(message)s")
         h.setFormatter(fmt)
         logger.addHandler(h)
-    # Also make sure uvicorn's level isn't hiding ours
     logging.getLogger("uvicorn").setLevel(logging.INFO)
     logging.getLogger("uvicorn.access").setLevel(logging.INFO)
     logging.getLogger("uvicorn.error").setLevel(logging.INFO)
 
-
 def create_app() -> FastAPI:
     _configure_logging()
-    app = FastAPI(title="VectorDB (Day 2)")
+    app = FastAPI(title="VectorDB")
+
+    @app.on_event("startup")
+    def _load_snapshot_and_wal():
+        bootstrap_from_disk()
 
     # Routers
     app.include_router(libraries.router)
@@ -35,6 +36,8 @@ def create_app() -> FastAPI:
     app.include_router(chunks.router)
     app.include_router(search.router)
     app.include_router(indexing.router)
+    app.include_router(admin.router)
+    app.include_router(search_temporal_router)
 
     # Exception handlers
     @app.exception_handler(NotFoundError)
@@ -52,7 +55,6 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST,
                             content={"error":"BadRequest","detail":exc.detail})
 
-    # Optional but helpful: make ValidationError JSON-safe
     @app.exception_handler(PydanticValidationError)
     async def pydantic_validation_handler(_: Request, exc: PydanticValidationError):
         return JSONResponse(
@@ -62,5 +64,5 @@ def create_app() -> FastAPI:
 
     return app
 
-# Keep this for non-factory runs (harmless even if you use --factory)
+# Instantiate for uvicorn
 app = create_app()

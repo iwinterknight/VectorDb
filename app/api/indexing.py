@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import HTTPException, APIRouter, Depends, status
 from uuid import UUID
 
 from app.domain.dtos import IndexBuildRequest, IndexStateOut
 from app.repo.memory import InMemoryRepo
 from app.services.indexing import IndexingService
 from app.singletons import get_repo, get_indexer
+from app.domain.errors import NotFoundError
 
 router = APIRouter(prefix="/v1/libraries/{lib_id}/index", tags=["indexing"])
 
@@ -26,4 +27,7 @@ def get_index_state(lib_id: UUID, idx: IndexingService = Depends(get_indexer)) -
 
 @router.get("/live")
 def get_live_index(lib_id: UUID, idx: IndexingService = Depends(get_indexer)):
-    return idx.get_live_index_params(lib_id)
+    try:
+        return idx.get_live_index_params(lib_id)
+    except NotFoundError:
+        raise HTTPException(status_code=404, detail="Library not found")

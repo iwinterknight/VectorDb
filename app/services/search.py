@@ -4,7 +4,7 @@ import logging
 from heapq import nlargest
 from uuid import UUID
 
-from app.domain.dtos import SearchRequest, SearchHit
+from app.domain.dtos import SearchRequest, RerankRequest, SearchHit
 from app.domain.errors import BadRequestError, NotFoundError
 from app.repo.indices.flat import FlatIndex
 from app.repo.indices.metrics import cosine, l2sq
@@ -12,6 +12,7 @@ from app.repo.memory import InMemoryRepo
 from app.services.embeddings import EmbeddingProvider
 from app.services.filters import match_obj
 from app.services.indexing import IndexingService
+from typing import List
 
 log = logging.getLogger("vectordb")
 
@@ -140,6 +141,56 @@ class SearchService:
                 if req.filters:
                     cand = [(cid, sc) for (cid, sc) in cand if (allowed_str is None or cid in allowed_str)]
                 topk = nlargest(req.k, cand, key=lambda t: t[1])
+
+            out: list[SearchHit] = []
+            for cid, score in topk:
+                c = self.repo.chunks[UUID(cid)]
+                out.append(SearchHit(
+                    chunk_id=str(c.id),
+                    document_id=str(c.document_id),
+                    library_id=str(c.library_id),
+                    score=float(score),
+                    text=c.text
+                ))
+            return out
+        finally:
+            lock.release_read()
+
+    def rerank(self, lib_id: UUID, req: RerankRequest) -> List[SearchHit]:
+        if lib_id not in self.repo.libraries:
+            raise NotFoundError("Library")
+
+        lock = self.repo.get_lock(lib_id)
+        lock.acquire_read()
+        try:
+            # Build/validate query vector
+            if req.query_embedding is not None:
+                q = req.query_embedding
+            else:
+                if not req.query_text:
+                    raise BadRequestError("Provide query_text or query_embedding")
+                q = self.embedder.embed([req.query_text])[0]
+            from app.services.validation import ensure_dim
+            ensure_dim(self.repo, lib_id, q)
+
+            # Filter candidate ids to those that exist and have embeddings
+            ids = []
+            for sid in req.candidate_ids:
+                try:
+                    cid = UUID(sid)
+                    ch = self.repo.chunks.get(cid)
+                    if ch is not None and ch.embedding is not None:
+                        ids.append(sid)
+                except Exception:
+                    # skip malformed ids silently
+                    continue
+
+            if not ids:
+                return []
+
+            # Exact score over candidate ids
+            scored = self._rank_over_ids(ids, q, req.metric)
+            topk = nlargest(max(1, req.k), scored, key=lambda t: t[1])
 
             out: list[SearchHit] = []
             for cid, score in topk:

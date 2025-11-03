@@ -1,0 +1,16 @@
+services:
+  temporal:
+    image: ghcr.io/temporalio/temporalite:latest
+    command: ["start", "--namespace", "default", "--ip", "0.0.0.0", "--port", "7233"]
+    ports:
+      - "7233:7233"
+    restart: unless-stopped
+
+  temporal-ui:
+    image: temporalio/ui:latest
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+    ports:
+      - "8233:8080"
+    depends_on:
+      - temporal

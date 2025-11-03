@@ -5,20 +5,32 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9ea72dbf-9292-42ba-b414-3c927b8ebb6f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/api/indexing.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/repo/indices/rp_forest.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/filters.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/services/indexing.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/singletons.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/api/test_filters.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/api/test_index_build_and_search_rp.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/search_temporal.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/persistence/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/persistence/store.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/temporal/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/temporal/activities.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/temporal/client.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/temporal/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/temporal/dtos.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/temporal/worker.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/temporal/workflows.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/temporal/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/libraries.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/libraries.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/indexing.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/indexing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/search.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/search.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/domain/dtos.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/domain/dtos.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/domain/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/domain/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/repo/memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/repo/memory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/chunks.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/chunks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/documents.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/documents.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/indexing.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/indexing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/libraries.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/libraries.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/search.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/search.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/singletons.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/singletons.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,21 +55,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/sunit/Documents/Projects/VectorDb",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -74,7 +92,8 @@
       <option name="presentableId" value="Default" />
       <updated>1761701104189</updated>
       <workItem from="1761701105779" duration="20321000" />
-      <workItem from="1761763332107" duration="6629000" />
+      <workItem from="1761763332107" duration="12971000" />
+      <workItem from="1762040510253" duration="19478000" />
     </task>
     <servers />
   </component>

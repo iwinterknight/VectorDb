@@ -1,8 +1,7 @@
+# app/services/indexing.py
 from __future__ import annotations
-
-import logging
 from datetime import datetime, timezone
-from typing import Literal
+from typing import Any, Literal, Optional
 from uuid import UUID
 
 from app.repo.memory import InMemoryRepo
@@ -11,14 +10,21 @@ from app.repo.indices.rp_forest import RPForestIndex
 from app.domain.models import IndexState
 from app.domain.errors import NotFoundError
 
-log = logging.getLogger("vectordb")
+# Optional (type only): avoid importing DiskStore at runtime to keep deps light
+try:
+    from app.persistence.store import DiskStore
+except Exception:
+    DiskStore = object  # type: ignore
+
 
 class IndexingService:
     """
     Manages per-library indices and safe build/swap under write lock.
+    Optionally persists index_state via a DiskStore (WAL) if provided.
     """
-    def __init__(self, repo: InMemoryRepo):
+    def __init__(self, repo: InMemoryRepo, store: Optional[DiskStore] = None):
         self.repo = repo
+        self.store = store
         self.flat_indices: dict[UUID, FlatIndex] = {}
         self.rp_indices: dict[UUID, RPForestIndex] = {}
 
@@ -42,28 +48,40 @@ class IndexingService:
             if algo == "flat":
                 idx = FlatIndex(metric=metric)
                 idx.rebuild(pairs)
-                # atomic swap
                 self.flat_indices[lib_id] = idx
-                log.info(f"[index.build] idx_service_id={id(self)} algo={algo} metric={metric} size={size} params={params}")
+                # you may clear rp if you want to enforce single-active
             elif algo == "rp":
                 trees = int(params.get("trees", 8))
                 leaf_size = int(params.get("leaf_size", 64))
                 seed = int(params.get("seed", 42))
-                candidate_mult = float(params.get("candidate_mult", 2.0))  # <-- NEW
+                candidate_mult = float(params.get("candidate_mult", 2.0))
                 idx = RPForestIndex(metric=metric, trees=trees, leaf_size=leaf_size,
-                                    seed=seed, candidate_mult=candidate_mult)  # <-- pass it
+                                    seed=seed, candidate_mult=candidate_mult)
                 idx.rebuild(pairs)
                 self.rp_indices[lib_id] = idx
-                log.info(f"[index.build] idx_service_id={id(self)} algo={algo} metric={metric} size={size} params={params}")
             else:
                 raise ValueError("Unknown algo")
 
-            # update library index state (simple: reflect the last built index)
+            # update library index state
             lib = self.repo.libraries[lib_id]
             lib.index_state = IndexState(
-                built=True, algo=algo, metric=metric, params=params,
-                size=size, last_built_at=datetime.now(timezone.utc)
+                built=True,
+                algo=algo,
+                metric=metric,
+                params=params,
+                size=size,
+                last_built_at=datetime.now(timezone.utc),
             )
+
+            # WAL the index_state if a store is available
+            if self.store is not None:
+                self.store.append_wal({
+                    "ts": datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),
+                    "op": "library.index_state",
+                    "library_id": str(lib_id),
+                    "index_state": lib.index_state.model_dump(mode="json"),
+                })
+
             return size
         finally:
             lock.release_write()
@@ -73,42 +91,49 @@ class IndexingService:
             raise NotFoundError("Library")
         return self.repo.libraries[lib_id].index_state
 
-    def get_available_index(self, lib_id: UUID, prefer: Literal["rp", "flat"] | None = None):
-        """
-        Returns (kind, instance). If 'prefer' is given, we only return that kind if available;
-        otherwise (None, None). If 'prefer' is None, we choose best available (rp > flat).
-        """
+    def get_available_index(self, lib_id: UUID, prefer: Literal["rp","flat"] | None = None):
         rp = self.rp_indices.get(lib_id)
         fl = self.flat_indices.get(lib_id)
-
-        if prefer == "rp":
-            return ("rp", rp) if rp is not None else (None, None)
-        if prefer == "flat":
-            return ("flat", fl) if fl is not None else (None, None)
-
-        # auto: prefer rp, then flat
+        if prefer == "rp" and rp is not None:
+            return ("rp", rp)
+        if prefer == "flat" and fl is not None:
+            return ("flat", fl)
         if rp is not None:
             return ("rp", rp)
         if fl is not None:
             return ("flat", fl)
         return (None, None)
 
-    def get_live_index_params(self, lib_id: UUID) -> dict:
-        out: dict = {"rp": None, "flat": None}
+    def get_live_index_params(self, lib_id: UUID) -> dict[str, Any]:
+        """
+        Inspect current in-memory indices for a library.
+        Returns shapes/params so you can verify which index is live after restart.
+        (Note: indices are not persisted; this purely reflects RAM.)
+        """
+        if lib_id not in self.repo.libraries:
+            raise NotFoundError("Library")
+
         rp = self.rp_indices.get(lib_id)
+        fl = self.flat_indices.get(lib_id)
+
+        out: dict[str, Any] = {"rp": None, "flat": None}
+
         if rp is not None:
+            # Be tolerant if internals differ; getattr with defaults
             out["rp"] = {
-                "trees": rp.trees,
-                "leaf_size": rp.leaf_size,
-                "seed": rp.seed,
+                "trees": getattr(rp, "trees", None),
+                "leaf_size": getattr(rp, "leaf_size", None),
+                "seed": getattr(rp, "seed", None),
                 "candidate_mult": getattr(rp, "candidate_mult", None),
+                "metric": getattr(rp, "metric", None),
                 "idx_id": id(rp),
             }
-        fl = self.flat_indices.get(lib_id)
+
         if fl is not None:
             out["flat"] = {
-                "metric": fl.metric,
+                "metric": getattr(fl, "metric", None),
                 "size": len(getattr(fl, "ids", [])),
                 "idx_id": id(fl),
             }
+
         return out

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from uuid import UUID
-from app.domain.dtos import SearchRequest
+from app.domain.dtos import SearchRequest, RerankRequest
 from app.repo.memory import InMemoryRepo
 from app.services.search import SearchService
 from app.services.embeddings import StubEmbeddingProvider
@@ -21,3 +21,8 @@ def get_search_service(
 @router.post("/search")
 def search(lib_id: UUID, body: SearchRequest, svc: SearchService = Depends(get_search_service)):
     return svc.search(lib_id, body)
+
+
+@router.post("/search/rerank")
+def rerank(lib_id: UUID, body: RerankRequest, svc: SearchService = Depends(get_search_service)):
+    return svc.rerank(lib_id, body)
