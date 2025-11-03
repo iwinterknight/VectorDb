@@ -31,3 +31,10 @@ def bootstrap_from_disk() -> None:
         log.info(f"[persistence] replaying WAL entries: {len(wal)}")
         for e in wal:
             repo_singleton.apply_wal_entry(e)
+    restored = indexer_singleton.restore_all_indices()
+    if restored:
+        details = ", ".join(
+            f"{lib_id}:{'/'.join(f'{algo}={size}' for algo, size in algos.items())}"
+            for lib_id, algos in restored.items()
+        )
+        log.info(f"[persistence] restored indices -> {details}")

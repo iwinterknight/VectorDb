@@ -3,7 +3,7 @@ from threading import RLock, Condition
 from typing import Dict
 from uuid import UUID
 from typing import Any
-from app.domain.models import Library, Document, Chunk, IndexState
+from app.domain.models import Library, Document, Chunk, IndexState, IndexAlgo
 
 class RWLock:
     def __init__(self):
@@ -72,7 +72,13 @@ class InMemoryRepo:
 
         for sid, ld in (image.get("libraries") or {}).items():
             lid = UUID(sid)
-            self.libraries[lid] = Library(**ld)
+            lib = Library(**ld)
+            # Ensure legacy snapshots populate index_states from index_state
+            if lib.index_state.built and lib.index_state.algo and not lib.index_states:
+                algo_key = lib.index_state.algo.value if isinstance(lib.index_state.algo, IndexAlgo) else lib.index_state.algo
+                if algo_key:
+                    lib.index_states = {algo_key: lib.index_state}
+            self.libraries[lid] = lib
             # ensure per-library lock exists
             self.get_lock(lid)
 
@@ -143,6 +149,16 @@ class InMemoryRepo:
             st = IndexState(**entry["index_state"])
             lib = self.libraries[lid]
             lib.index_state = st
+            states_map = dict(lib.index_states)
+            entry_states = entry.get("index_states")
+            if entry_states:
+                for algo_key, state_data in entry_states.items():
+                    states_map[str(algo_key)] = IndexState(**state_data)
+            else:
+                algo_key = st.algo.value if isinstance(st.algo, IndexAlgo) else st.algo
+                if algo_key:
+                    states_map[str(algo_key)] = st
+            lib.index_states = states_map
             self.libraries[lid] = lib
         else:
             # unknown op; ignore safely

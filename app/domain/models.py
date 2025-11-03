@@ -57,4 +57,5 @@ class Library(BaseModel):
     description: str | None = None
     metadata: LibraryMeta = Field(default_factory=LibraryMeta)
     index_state: IndexState = Field(default_factory=IndexState)
+    index_states: dict[str, IndexState] = Field(default_factory=dict)
     embedding_dim: int | None = None
