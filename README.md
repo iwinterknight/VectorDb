@@ -98,9 +98,10 @@ docker compose up --build
 - Port 7233 → Temporal gRPC endpoint (for SDK clients).
 - Port 8233 → Temporal Web UI.
 
-By default the compose file runs with the stub embedding provider, so no external API
-keys are required. Override `EMBEDDING_PROVIDER` (and related Cohere settings) in the
-compose file or with an `.env` if you need real embeddings.
+Runtime configuration is loaded from `.env`, so you can keep values like
+`EMBEDDING_PROVIDER=cohere`, `COHERE_API_KEY=...`, and embedding dimensions in one
+place. The compose file still overrides network-specific values (`TEMPORAL_ADDRESS`,
+`APP_BASE_URL`) to point at in-cluster services.
 
 Named volumes keep repo snapshots/WAL (`vectordb-data`), API logs (`vectordb-logs`),
 and Temporal Postgres state (`temporal-pg`). Because the API loads from snapshot + WAL

@@ -48,11 +48,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
       DATA_DIR: /var/lib/vectordb
       TEMPORAL_ADDRESS: temporal:7233
       TEMPORAL_NAMESPACE: default
-      EMBEDDING_PROVIDER: stub
     volumes:
       - vectordb-data:/var/lib/vectordb
       - vectordb-logs:/app/logs
@@ -78,12 +79,13 @@ services:
       context: .
       dockerfile: Dockerfile
     command: ["python", "-m", "app.temporal.worker"]
+    env_file:
+      - .env
     environment:
       DATA_DIR: /var/lib/vectordb
       TEMPORAL_ADDRESS: temporal:7233
       TEMPORAL_NAMESPACE: default
       APP_BASE_URL: http://api:8000
-      EMBEDDING_PROVIDER: stub
     volumes:
       - vectordb-data:/var/lib/vectordb
       - vectordb-logs:/app/logs
