@@ -57,7 +57,7 @@ class LibraryService:
             lib.description = description
             patch["description"] = description
 
-        # Only WAL if something actually changed
+        # Only WAL if something changed
         if patch:
             store.append_wal({
                 "ts": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),

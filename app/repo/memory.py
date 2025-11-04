@@ -43,7 +43,7 @@ class InMemoryRepo:
             self.locks[lib_id] = RWLock()
         return self.locks[lib_id]
 
-    # ---------- (A) serialization ----------
+    # serialization
     def dump_json(self) -> dict[str, Any]:
         """Serialize full repo to JSON-friendly dict."""
         libs = {str(k): v.model_dump(mode="json") for k, v in self.libraries.items()}
@@ -57,7 +57,7 @@ class InMemoryRepo:
             "chunks": chks,
         }
 
-    # ---------- (B) hydrate from snapshot ----------
+    # load from snapshot
     def hydrate(self, image: dict[str, Any]) -> None:
         """Replace in-memory state with a snapshot image."""
         self.libraries.clear()

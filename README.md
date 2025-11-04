@@ -207,14 +207,24 @@ completes. Temporal keeps the pipeline resilient (retries, signal handling, long
 
 ## Bulk data loader
 
-`data/chunk_clusters.jsonl` contains 1,000 synthetic chunks (200 clusters × 5 variants).
-The helper script loads them via the SDK and optionally triggers index builds:
+`scripts/load_dummy_chunks.py` seeds the API with the synthetic dataset in
+`data/chunk_clusters.jsonl` (1,000 chunks covering 200 clusters):
 
-```bash
-python scripts/load_dummy_chunks.py --build-index
-```
+1. Make sure the API is running (`uvicorn app.main:app --reload` by default) and the
+   Temporal stack is optional for this loader.
+2. Activate your virtualenv: `source .venv/bin/activate`.
+3. Run the loader. The command below creates or reuses a `clustered-demo` library,
+   uploads all chunks, and builds an RP index:
 
-This is a quick way to seed demo data and evaluate ANN behaviour.
+   ```bash
+   python scripts/load_dummy_chunks.py --build-index
+   ```
+
+   Use `--base-url` if your API is bound to a different host/port, `--data-file` to
+   load your own JSONL, or switch to a flat index with `--algo flat`.
+
+You can verify the imported data with `GET /v1/libraries` or the Python SDK
+(`cli.list_libraries()`/`cli.list_chunks(...)`).
 
 ---
 
