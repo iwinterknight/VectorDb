@@ -17,7 +17,7 @@ with Temporal.
 - [Python SDK quickstart](#python-sdk-quickstart)
 - [Indexes](#indexes)
 - [Temporal workflows](#temporal-workflows)
-- [Bulk demo loader](#bulk-demo-loader)
+- [Bulk data loader](#bulk-data-loader)
 - [Tests](#tests)
 
 ---
