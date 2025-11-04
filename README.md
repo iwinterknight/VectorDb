@@ -127,6 +127,21 @@ time (nothing runs automatically at startup):
 docker compose exec api python scripts/load_dummy_chunks.py --base-url http://api:8000 --build-index
 ```
 
+### Resetting state
+
+- Remove everything (VectorDB snapshot/WAL, logs, Temporal Postgres) and start clean:
+
+  ```bash
+  docker compose down --volumes
+  ```
+
+- Keep Temporal history but clear VectorDB data/logs:
+
+  ```bash
+  docker compose down
+  docker volume rm vectordb-data vectordb-logs
+  ```
+
 ---
 
 ## REST quickstart
