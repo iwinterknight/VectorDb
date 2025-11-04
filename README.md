@@ -13,6 +13,7 @@ with Temporal.
 - [Project setup](#project-setup)
 - [Configuration](#configuration)
 - [Running the API](#running-the-api)
+- [Docker stack](#docker-stack)
 - [REST quickstart](#rest-quickstart)
 - [Python SDK quickstart](#python-sdk-quickstart)
 - [Indexes](#indexes)
@@ -80,6 +81,51 @@ uvicorn app.main:app --reload --port 8000
 ```
 
 The API logs to both stdout and `logs/vectordb.log` (rotating 5 × 5 MB).
+
+---
+
+## Docker stack
+
+Prefer everything in containers? The root `docker-compose.yml` builds the app, runs the
+test suite during image creation, and launches the full stack (VectorDB API, Temporal
+worker, Temporal server, UI, and Postgres persistence).
+
+```bash
+docker compose up --build
+```
+
+- Port 8000 → FastAPI service (`/v1/...`).
+- Port 7233 → Temporal gRPC endpoint (for SDK clients).
+- Port 8233 → Temporal Web UI.
+
+By default the compose file runs with the stub embedding provider, so no external API
+keys are required. Override `EMBEDDING_PROVIDER` (and related Cohere settings) in the
+compose file or with an `.env` if you need real embeddings.
+
+Named volumes keep repo snapshots/WAL (`vectordb-data`), API logs (`vectordb-logs`),
+and Temporal Postgres state (`temporal-pg`). Because the API loads from snapshot + WAL
+on startup and Temporal persists to Postgres, the stack survives container restarts and
+crashes. Remove `--build` on subsequent launches to reuse the cached image; Docker will
+still re-run tests automatically if the build context changes.
+
+To stop the stack while keeping data:
+
+```bash
+docker compose down
+```
+
+To wipe all persisted state:
+
+```bash
+docker compose down --volumes
+```
+
+Bulk data loading remains opt-in. You can run the helper inside the API container at any
+time (nothing runs automatically at startup):
+
+```bash
+docker compose exec api python scripts/load_dummy_chunks.py --base-url http://api:8000 --build-index
+```
 
 ---
 
