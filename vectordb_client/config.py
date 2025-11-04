@@ -7,7 +7,7 @@ DEFAULT_RETRIES = 2
 
 @dataclass(frozen=True)
 class ClientConfig:
-    base_url: str                 # e.g., "http://localhost:8000"
-    api_key: str | None = None    # reserved for future auth
+    base_url: str                 # url of the app
+    api_key: str | None = None    # if auth is added to the sdk client in the future
     timeout_s: float = DEFAULT_TIMEOUT_S
     retries: int = DEFAULT_RETRIES
