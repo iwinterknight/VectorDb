@@ -205,7 +205,7 @@ completes. Temporal keeps the pipeline resilient (retries, signal handling, long
 
 ---
 
-## Bulk demo loader
+## Bulk data loader
 
 `data/chunk_clusters.jsonl` contains 1,000 synthetic chunks (200 clusters × 5 variants).
 The helper script loads them via the SDK and optionally triggers index builds:
