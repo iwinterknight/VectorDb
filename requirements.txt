@@ -6,4 +6,3 @@ httpx==0.27.0
 numpy==2.1.1
 temporalio==1.18.2
 cohere==5.5.3
-cohere>=5.5.8

@@ -7,7 +7,7 @@ from temporalio import activity
 from app.temporal.config import APP_BASE_URL
 
 @activity.defn
-def preprocess(request: Dict[str, Any], library_id: str) -> Dict[str, Any]:
+async def preprocess(request: Dict[str, Any], library_id: str) -> Dict[str, Any]:
     algo = request.get("algo", "auto")
     metric = request.get("metric", "cosine")
     k = int(request.get("k", 5))
@@ -35,12 +35,12 @@ def preprocess(request: Dict[str, Any], library_id: str) -> Dict[str, Any]:
     }
 
 @activity.defn
-def retrieve(preprocessed: Dict[str, Any]) -> Dict[str, Any]:
+async def retrieve(preprocessed: Dict[str, Any]) -> Dict[str, Any]:
     lib = preprocessed["library_id"]
     url = f"{APP_BASE_URL}/v1/libraries/{lib}/search"
     started = time.perf_counter()
-    with httpx.Client(timeout=30.0) as client:
-        resp = client.post(url, json=preprocessed["request"])
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(url, json=preprocessed["request"])
         resp.raise_for_status()
         hits: List[Dict[str, Any]] = resp.json()
     elapsed_ms = int((time.perf_counter() - started) * 1000)
@@ -52,7 +52,7 @@ def retrieve(preprocessed: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 @activity.defn
-def rerank(preprocessed: Dict[str, Any], retrieved: Dict[str, Any]) -> Dict[str, Any]:
+async def rerank(preprocessed: Dict[str, Any], retrieved: Dict[str, Any]) -> Dict[str, Any]:
     if preprocessed["algo"] != "rp":
         return retrieved
     cand_ids = [h.get("chunk_id") for h in retrieved.get("hits", []) if h.get("chunk_id")]
@@ -74,8 +74,8 @@ def rerank(preprocessed: Dict[str, Any], retrieved: Dict[str, Any]) -> Dict[str,
     url = f"{APP_BASE_URL}/v1/libraries/{lib}/search/rerank"
     import time as _t
     started = _t.perf_counter()
-    with httpx.Client(timeout=30.0) as client:
-        resp = client.post(url, json=body)
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.post(url, json=body)
         resp.raise_for_status()
         hits2: List[Dict[str, Any]] = resp.json()
     elapsed_ms = int((_t.perf_counter() - started) * 1000)
@@ -88,7 +88,7 @@ def rerank(preprocessed: Dict[str, Any], retrieved: Dict[str, Any]) -> Dict[str,
     }
 
 @activity.defn
-def answer(preprocessed: Dict[str, Any], final_hits: Dict[str, Any]) -> Dict[str, Any]:
+async def answer(preprocessed: Dict[str, Any], final_hits: Dict[str, Any]) -> Dict[str, Any]:
     meta = {
         "algo_initial": preprocessed["algo"],
         "algo_final": final_hits.get("algo_used"),
