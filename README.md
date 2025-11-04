@@ -1,11 +1,235 @@
-# VectorDB (Day 1)
+# VectorDB
 
-A small Vector DB API in FastAPI with Libraries → Documents → Chunks,
-stub embeddings, Flat (exact) search, and per-library embedding dimension enforcement.
+Temporal-enabled vector search playground built with FastAPI. The service lets you
+manage libraries → documents → chunks, ingest embeddings (stub or Cohere), build
+exact/RP indexes, run synchronous searches, and orchestrate more advanced pipelines
+with Temporal.
 
-## Run (local)
+---
+
+## Table of contents
+
+- [Prerequisites](#prerequisites)
+- [Project setup](#project-setup)
+- [Configuration](#configuration)
+- [Running the API](#running-the-api)
+- [REST quickstart](#rest-quickstart)
+- [Python SDK quickstart](#python-sdk-quickstart)
+- [Indexes](#indexes)
+- [Temporal workflows](#temporal-workflows)
+- [Bulk demo loader](#bulk-demo-loader)
+- [Tests](#tests)
+
+---
+
+## Prerequisites
+
+- Python 3.12+
+- `uvicorn` for local development (installed via requirements)
+- Optional: Docker & docker-compose when running Temporal locally (`temporal/docker-compose.yml`)
+
+---
+
+## Project setup
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
+git clone https://github.com/<you>/VectorDb.git
+cd VectorDb
+python -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
+```
+
+If you want Cohere embeddings, install the SDK as well:
+
+```bash
+pip install cohere==5.5.3
+```
+
+---
+
+## Configuration
+
+All configuration runs through `.env` at the project root. Key settings:
+
+```env
+# Embedding provider: stub (deterministic) or cohere (real API)
+EMBEDDING_PROVIDER=stub
+
+# When using Cohere
+COHERE_API_KEY=...
+COHERE_MODEL=embed-english-v3.0
+COHERE_INPUT_TYPE=search_query
+COHERE_TRUNCATE=END
+
+# Temporal defaults
+TEMPORAL_ADDRESS=localhost:7233
+TEMPORAL_NAMESPACE=default
+```
+
+The app loads `.env` automatically at startup (important for Uvicorn, workers, and tests).
+
+---
+
+## Running the API
+
+```bash
+source .venv/bin/activate
 uvicorn app.main:app --reload --port 8000
+```
+
+The API logs to both stdout and `logs/vectordb.log` (rotating 5 × 5 MB).
+
+---
+
+## REST quickstart
+
+Basic workflow with `curl` or REST clients:
+
+```bash
+BASE=http://localhost:8000
+
+# Create a library
+curl -s $BASE/v1/libraries -X POST -H "Content-Type: application/json" \
+  -d '{"name":"demo-lib","description":"quickstart"}'
+
+# Create a document within the library
+curl -s $BASE/v1/libraries/{LIB_ID}/documents -X POST \
+  -H "Content-Type: application/json" -d '{"title":"intro"}'
+
+# Create chunks (embeddings computed automatically if compute_embedding=true)
+curl -s $BASE/v1/libraries/{LIB_ID}/documents/{DOC_ID}/chunks \
+  -X POST -H "Content-Type: application/json" \
+  -d '{"text": "vector search basics", "compute_embedding": true}'
+
+# Build an index (rp or flat)
+curl -s $BASE/v1/libraries/{LIB_ID}/index/build \
+  -X POST -H "Content-Type: application/json" \
+  -d '{"algo":"rp","metric":"cosine","params":{"trees":8,"leaf_size":32}}'
+
+# Run a query
+curl -s $BASE/v1/libraries/{LIB_ID}/search \
+  -X POST -H "Content-Type: application/json" \
+  -d '{"query_text":"vector search", "k":5, "algo":"rp"}'
+```
+
+All endpoints live under `/v1/...`.
+
+---
+
+## Python SDK quickstart
+
+Install the editable SDK and use the helpers under `vectordb_client`:
+
+```bash
+pip install --no-build-isolation --no-deps -e .
+```
+
+### Standalone session
+
+```python
+from vectordb_client import ClientConfig, VectorDBClient, models as M
+
+cfg = ClientConfig(base_url="http://localhost:8000", timeout_s=30, retries=2)
+cli = VectorDBClient(cfg)
+
+lib = cli.create_library("sdk-lib", "Managed via Python client")
+doc = cli.create_document(lib.id, "Notes")
+
+chunk = cli.create_chunk(
+    lib.id,
+    doc.id,
+    text="Approximate nearest neighbors trade recall for speed.",
+    metadata={"tags": ["ann", "search"]},
+)
+
+cli.build_index(lib.id, algo="rp", metric="cosine", params={"trees": 4, "leaf_size": 32})
+
+req = M.SearchRequest(query_text="nearest neighbors", k=3, algo="rp", metric="cosine")
+hits = cli.search(lib.id, req)
+print([h.chunk_id for h in hits])
+```
+
+### Temporal helper
+
+To start asynchronous workflows via Temporal:
+
+```python
+from vectordb_client import TemporalClient
+
+tcli = TemporalClient(cli)
+resp = tcli.start_query(lib.id, req, wait=False)
+print(resp.workflow_id)
+
+status = tcli.status(resp.workflow_id)
+preview = tcli.preview(resp.workflow_id, n=3)
+
+# synchronous request (wait=True) returns final result
+final = tcli.start_query(lib.id, req, wait=True)
+```
+
+The SDK also supports bulk chunk creation, rerank, and index inspection.
+
+---
+
+## Indexes
+
+Two index strategies can be active per-library:
+
+- **Flat**: exact search over all embedding vectors (cosine or L2).
+- **RP Forest**: approximate nearest neighbor using random projection trees with rerank.
+
+Each library tracks `index_states` so both can be rebuilt after persistence or restart.
+Use `/v1/libraries/{lib_id}/index` to inspect the persisted state and `/v1/libraries/{lib_id}/index/live` to check in-memory status.
+
+---
+
+## Temporal workflows
+
+Temporal powers the orchestrated query pipeline (`app/temporal/*`):
+
+1. **Preprocess** – normalize request, run server-side validation, merge signaled filters.
+2. **Retrieve** – call REST `/search` to gather candidates.
+3. **Rerank** – optional second pass using rp+exact hybrid.
+4. **Answer** – assemble metadata/response (for downstream messaging or UI).
+
+Workers listen on `QUERY_TASK_QUEUE`. Start the Temporal stack via `temporal/docker-compose.yml`, set `TEMPORAL_ADDRESS` and `TEMPORAL_NAMESPACE`, then run:
+
+```bash
+python -m app.temporal.worker
+```
+
+Clients can poll workflow status, preview partial results, or signal filters before retrieve
+completes. Temporal keeps the pipeline resilient (retries, signal handling, long-running queries).
+
+---
+
+## Bulk demo loader
+
+`data/chunk_clusters.jsonl` contains 1,000 synthetic chunks (200 clusters × 5 variants).
+The helper script loads them via the SDK and optionally triggers index builds:
+
+```bash
+python scripts/load_dummy_chunks.py --build-index
+```
+
+This is a quick way to seed demo data and evaluate ANN behaviour.
+
+---
+
+## Tests
+
+Run everything with `pytest` (stub embedder enforced via `tests/conftest.py`):
+
+```bash
+pytest
+```
+
+- Unit tests cover search filters/rerank and index restoration.
+- API tests validate chunk lifecycle, filter behaviour, dimensional enforcement, and index build/search flows.
+
+---
+
+Happy hacking! Use the REST API for simple integration, the Python SDK for scripting,
+and Temporal when you need orchestrated search workflows.

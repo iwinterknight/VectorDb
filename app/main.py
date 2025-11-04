@@ -1,5 +1,7 @@
 # app/main.py
 import logging
+from logging.handlers import RotatingFileHandler
+from pathlib import Path
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -10,20 +12,50 @@ from app.singletons import bootstrap_from_disk
 from app.domain.errors import NotFoundError, ConflictError, BadRequestError
 from pydantic import ValidationError as PydanticValidationError
 
+LOG_DIR = Path(__file__).resolve().parent.parent / "logs"
+LOG_FILE = LOG_DIR / "vectordb.log"
+
+
 def _configure_logging():
     logger = logging.getLogger("vectordb")
     logger.setLevel(logging.INFO)
     if not logger.handlers:
-        h = logging.StreamHandler()
         fmt = logging.Formatter("%(asctime)s %(levelname)s %(name)s - %(message)s")
-        h.setFormatter(fmt)
-        logger.addHandler(h)
+
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(fmt)
+        logger.addHandler(stream_handler)
+
+        try:
+            LOG_DIR.mkdir(parents=True, exist_ok=True)
+            file_handler = RotatingFileHandler(LOG_FILE, maxBytes=5 * 1024 * 1024, backupCount=5)
+            file_handler.setFormatter(fmt)
+            logger.addHandler(file_handler)
+        except Exception as exc:
+            logger.warning("Failed to initialize file logging at %s: %s", LOG_FILE, exc)
+
+    logger.propagate = False
     logging.getLogger("uvicorn").setLevel(logging.INFO)
     logging.getLogger("uvicorn.access").setLevel(logging.INFO)
     logging.getLogger("uvicorn.error").setLevel(logging.INFO)
 
 def create_app() -> FastAPI:
     _configure_logging()
+    logger = logging.getLogger("vectordb")
+    try:
+        from app.singletons import get_embedder  # local import to avoid cycles
+
+        embedder = get_embedder()
+        cls_name = embedder.__class__.__name__
+        model = getattr(embedder, "model", None)
+        dim = getattr(embedder, "dim", None) or getattr(embedder, "embedding_dim", None)
+        if model:
+            logger.info("[embed] Using %s model=%s", cls_name, model)
+        else:
+            logger.info("[embed] Using %s dim=%s", cls_name, dim or "unknown")
+    except Exception as exc:
+        logger.warning("Could not log active embedder: %s", exc)
+
     app = FastAPI(title="VectorDB")
 
     @app.on_event("startup")

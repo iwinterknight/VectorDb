@@ -4,21 +4,29 @@ import logging
 
 from app.repo.memory import InMemoryRepo
 from app.services.indexing import IndexingService
-from app.services.embeddings import StubEmbeddingProvider
+from app.services.embeddings import StubEmbeddingProvider, CohereEmbeddingProvider
 from app.persistence.store import DiskStore
+from app.config import settings
 
 log = logging.getLogger("vectordb")
 
 # singletons
 repo_singleton = InMemoryRepo()
-store_singleton = DiskStore()           # or DiskStore("/data")
+store_singleton = DiskStore()
 indexer_singleton = IndexingService(repo_singleton, store=store_singleton)
-embedder_singleton = StubEmbeddingProvider()
+
+if settings.embedding_provider.lower() == "cohere":
+    embedder_singleton = CohereEmbeddingProvider()
+    log.info("[embed] Using CohereEmbeddingProvider model=%s", settings.cohere_model)
+else:
+    embedder_singleton = StubEmbeddingProvider()
+    log.info("[embed] Using StubEmbeddingProvider dim=%d", settings.embedding_dim)
 
 def get_repo() -> InMemoryRepo: return repo_singleton
 def get_indexer() -> IndexingService: return indexer_singleton
-def get_embedder() -> StubEmbeddingProvider: return embedder_singleton
 def get_store() -> DiskStore: return store_singleton
+def get_embedder(): return embedder_singleton
+
 
 def bootstrap_from_disk() -> None:
     loaded = store_singleton.load()

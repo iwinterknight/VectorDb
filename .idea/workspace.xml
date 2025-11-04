@@ -5,11 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9ea72dbf-9292-42ba-b414-3c927b8ebb6f" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/domain/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/domain/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/repo/memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/repo/memory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/indexing.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/indexing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/chunks.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/chunks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/search.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/search.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/embeddings.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/embeddings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/singletons.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/singletons.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vectordb_client/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/vectordb_client/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vectordb_client/client.py" beforeDir="false" afterPath="$PROJECT_DIR$/vectordb_client/client.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vectordb_client/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/vectordb_client/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vectordb_client/examples/compare_indexes.py" beforeDir="false" afterPath="$PROJECT_DIR$/vectordb_client/examples/compare_indexes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vectordb_client/examples/quickstart.py" beforeDir="false" afterPath="$PROJECT_DIR$/vectordb_client/examples/quickstart.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vectordb_client/examples/temporal_async.py" beforeDir="false" afterPath="$PROJECT_DIR$/vectordb_client/examples/temporal_async.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vectordb_client/exceptions.py" beforeDir="false" afterPath="$PROJECT_DIR$/vectordb_client/exceptions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vectordb_client/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/vectordb_client/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vectordb_client/temporal.py" beforeDir="false" afterPath="$PROJECT_DIR$/vectordb_client/temporal.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +86,7 @@
       <updated>1761701104189</updated>
       <workItem from="1761701105779" duration="20321000" />
       <workItem from="1761763332107" duration="12971000" />
-      <workItem from="1762040510253" duration="26372000" />
+      <workItem from="1762040510253" duration="41844000" />
     </task>
     <servers />
   </component>

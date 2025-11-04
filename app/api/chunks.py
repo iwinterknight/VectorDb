@@ -3,13 +3,16 @@ from uuid import UUID
 from app.domain.dtos import CreateChunkIn, UpdateChunkIn
 from app.repo.memory import InMemoryRepo
 from app.services.chunks import ChunkService
-from app.services.embeddings import StubEmbeddingProvider
-from app.api.libraries import repo_singleton
+from app.services.embeddings import EmbeddingProvider
+from app.singletons import get_repo, get_embedder
 
 router = APIRouter(prefix="/v1/libraries/{lib_id}/documents/{doc_id}/chunks", tags=["chunks"])
 
-def get_chunk_service(repo: InMemoryRepo = Depends(lambda: repo_singleton)) -> ChunkService:
-    return ChunkService(repo, StubEmbeddingProvider())
+def get_chunk_service(
+    repo: InMemoryRepo = Depends(get_repo),
+    embedder: EmbeddingProvider = Depends(get_embedder),
+) -> ChunkService:
+    return ChunkService(repo, embedder)
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_chunk(lib_id: UUID, doc_id: UUID, body: CreateChunkIn, svc: ChunkService = Depends(get_chunk_service)):
